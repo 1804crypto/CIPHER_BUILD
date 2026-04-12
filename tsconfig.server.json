@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "outDir": "dist-server",
+    "strict": true
+  },
+  "include": ["server/**/*.ts"]
+}
