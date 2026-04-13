@@ -3,7 +3,83 @@ import Anthropic from '@anthropic-ai/sdk'
 import { getCipherSystemPrompt } from '../prompts/system'
 
 const router = Router()
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || 'no-key-provided' })
+const ZAI_API_KEY = '539c00bb5c5146579abdf08905d7b18d.r6CzlXeHWATy0flh'
+
+async function callZaiStreamFallback(systemPrompt: string, conversationHistory: any[], fullUserPrompt: string, send: (data: object) => void) {
+  const zaiMessages = [
+    { role: 'system', content: systemPrompt },
+    ...conversationHistory,
+    { role: 'user', content: fullUserPrompt }
+  ]
+
+  const zaiRes = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${ZAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: 'glm-4-plus',
+      messages: zaiMessages,
+      stream: true,
+      tools: [{ type: 'web_search', web_search: { enable: true } }]
+    })
+  })
+
+  if (!zaiRes.ok) throw new Error(`Z.ai fallback failed: ${zaiRes.statusText}`)
+
+  const reader = zaiRes.body?.getReader()
+  if (!reader) throw new Error('No body in Z.ai response')
+  
+  const decoder = new TextDecoder()
+  let accumulated = ''
+  send({ type: 'search', query: 'Routing request to Z.ai primary node...' })
+  send({ type: 'search', query: 'Web search protocol executing natively inside Zhipu cluster...' })
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    accumulated += decoder.decode(value, { stream: true })
+    
+    const lines = accumulated.split('\n')
+    accumulated = lines.pop() || ''
+    
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const payload = line.slice(6).trim()
+        if (payload === '[DONE]') continue
+        try {
+          const parsed = JSON.parse(payload)
+          const content = parsed.choices?.[0]?.delta?.content
+          if (content) send({ type: 'text', text: content })
+        } catch { /* ignore JSON chunk parse skips */ }
+      }
+    }
+  }
+}
+
+async function callZaiOnceFallback(systemPrompt: string, fullUserPrompt: string) {
+  const zaiRes = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${ZAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: 'glm-4-plus',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: fullUserPrompt }
+      ],
+      tools: [{ type: 'web_search', web_search: { enable: true } }]
+    })
+  })
+  if (!zaiRes.ok) throw new Error(`Z.ai fallback failed: ${zaiRes.statusText}`)
+  const data = await zaiRes.json()
+  return data.choices?.[0]?.message?.content || ''
+}
+
 
 // Simple rate limiter
 const requestCounts = new Map<string, { count: number; resetAt: number }>()
@@ -88,26 +164,27 @@ router.post('/stream', async (req, res) => {
       { role: 'user' as const, content: fullUserPrompt }
     ]
 
-    const stream = client.messages.stream({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8192,
-      system: systemPrompt,
-      tools: [{ type: 'web_search_20250305' as const, name: 'web_search' }],
-      messages,
-    })
+    try {
+      const stream = client.messages.stream({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8192,
+        system: systemPrompt,
+        tools: [{ type: 'web_search_20250305' as const, name: 'web_search' }],
+        messages,
+      })
 
-    for await (const event of stream) {
-      if (event.type === 'content_block_delta') {
-        if (event.delta.type === 'text_delta') {
+      for await (const event of stream) {
+        if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
           send({ type: 'text', text: event.delta.text })
         }
-      }
-      if (event.type === 'content_block_start') {
-        if (event.content_block.type === 'tool_use' && event.content_block.name === 'web_search') {
+        if (event.type === 'content_block_start' && event.content_block.type === 'tool_use' && event.content_block.name === 'web_search') {
           const input = event.content_block.input as { query?: string }
           if (input?.query) send({ type: 'search', query: input.query })
         }
       }
+    } catch (anthropicErr) {
+      console.warn('Anthropic API failed or key missing, falling back to Z.ai natively', anthropicErr)
+      await callZaiStreamFallback(systemPrompt, conversationHistory, fullUserPrompt, send)
     }
 
     send({ type: 'done' })
@@ -129,17 +206,23 @@ router.post('/once', async (req, res) => {
   try {
     const systemPrompt = getCipherSystemPrompt()
     const outputSpec = getModuleOutputSpec(module)
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8192,
-      system: systemPrompt,
-      tools: [{ type: 'web_search_20250305' as const, name: 'web_search' }],
-      messages: [{ role: 'user', content: `${userPrompt}\n\n${outputSpec}` }],
-    })
-    const text = response.content
-      .filter(b => b.type === 'text')
-      .map(b => (b as Anthropic.TextBlock).text)
-      .join('')
+    let text = ''
+    try {
+      const response = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8192,
+        system: systemPrompt,
+        tools: [{ type: 'web_search_20250305' as const, name: 'web_search' }],
+        messages: [{ role: 'user', content: `${userPrompt}\n\n${outputSpec}` }],
+      })
+      text = response.content
+        .filter(b => b.type === 'text')
+        .map(b => (b as Anthropic.TextBlock).text)
+        .join('')
+    } catch (anthropicErr) {
+      console.warn('Anthropic API failed or key missing, falling back to Z.ai natively', anthropicErr)
+      text = await callZaiOnceFallback(systemPrompt, `${userPrompt}\n\n${outputSpec}`)
+    }
     res.json({ text })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
