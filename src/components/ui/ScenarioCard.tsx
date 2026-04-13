@@ -13,10 +13,10 @@ export const ScenarioCard: React.FC<Props> = ({ scenario }) => {
   const isProfitable = scenario.returnMultiple > 1
 
   const cardStyle = isBear 
-    ? 'bg-cipher-bg border-cipher-red/30' 
-    : 'bg-cipher-surface border-cipher-border'
+    ? 'glass-panel border-cipher-red/30 hover:border-cipher-red/50 hover:shadow-[0_0_20px_rgba(239,68,68,0.15)] hover:-translate-y-1' 
+    : 'glass-panel border-cipher-border hover:border-cipher-green/40 hover:shadow-[0_0_20px_rgba(0,212,170,0.1)] hover:-translate-y-1'
 
-  const multipleColor = isProfitable ? 'text-cipher-green' : 'text-cipher-red'
+  const multipleColor = isProfitable ? 'text-cipher-green drop-shadow-[0_0_8px_rgba(0,212,170,0.5)]' : 'text-cipher-red'
 
   return (
     <div className={`p-4 rounded border flex flex-col gap-3 ${cardStyle}`}>

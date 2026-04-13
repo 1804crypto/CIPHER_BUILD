@@ -7,6 +7,7 @@ export default {
       fontFamily: {
         mono: ['JetBrains Mono', 'monospace'],
         sans: ['Inter', 'sans-serif'],
+        display: ['Outfit', 'sans-serif'],
       },
       colors: {
         cipher: {

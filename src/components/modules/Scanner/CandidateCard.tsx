@@ -10,7 +10,8 @@ export const CandidateCard: React.FC<{ candidate: CandidateToken }> = ({ candida
   const navigate = useNavigate()
 
   return (
-    <div className="border border-cipher-border bg-cipher-surface rounded p-6 flex flex-col gap-6">
+    <div className="glass-panel hover:border-cipher-blue/40 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 rounded-xl p-6 flex flex-col gap-6 group relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-cipher-blue/0 to-cipher-purple/0 group-hover:from-cipher-blue/5 group-hover:to-cipher-purple/5 transition-all duration-500 pointer-events-none" />
       <div className="flex flex-wrap justify-between items-start gap-4">
         <div>
           <h3 className="text-2xl font-bold">{candidate.name} <span className="text-cipher-dim font-mono text-lg">${candidate.ticker}</span></h3>

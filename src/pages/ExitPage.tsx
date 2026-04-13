@@ -79,7 +79,7 @@ Define a hard stop-loss price and provide the rationale.
         <button 
           onClick={handleCalculate}
           disabled={status === 'streaming'}
-          className="w-full md:w-auto px-8 py-3 bg-cipher-blue text-white font-bold rounded cursor-pointer hover:bg-cipher-blue/80 disabled:opacity-50 uppercase whitespace-nowrap"
+          className="w-full md:w-auto px-8 py-3 bg-cipher-blue text-white font-bold rounded cursor-pointer hover:bg-cipher-blue/90 disabled:opacity-50 uppercase whitespace-nowrap transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 tracking-wide"
         >
           Plan Exit
         </button>

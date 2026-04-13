@@ -62,7 +62,7 @@ Apply Epistemic Integrity Protocol throughout.
         <button 
           onClick={handleAudit}
           disabled={status === 'streaming' || holdings.length === 0}
-          className="px-6 py-2 bg-cipher-blue text-white font-bold rounded cursor-pointer hover:bg-cipher-blue/80 disabled:opacity-50 uppercase whitespace-nowrap"
+          className="px-8 py-3 bg-cipher-blue text-white font-bold rounded cursor-pointer hover:bg-cipher-blue/90 disabled:opacity-50 uppercase whitespace-nowrap transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 tracking-wide"
         >
           Run Portfolio Audit
         </button>

@@ -16,7 +16,7 @@ export const Sidebar: React.FC = () => {
   ]
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-64 bg-cipher-surface border-r border-cipher-border hidden lg:flex flex-col z-50">
+    <aside className="fixed inset-y-0 left-0 w-64 glass-panel border-y-0 border-l-0 hidden lg:flex flex-col z-50">
       <div className="p-6 border-b border-cipher-border flex items-center gap-3 shrink-0">
         <div className="w-8 h-8 bg-cipher-blue rounded flex items-center justify-center font-bold text-white shadow shadow-cipher-blue/50">C</div>
         <span className="font-bold text-xl tracking-widest text-white">CIPHER</span>
@@ -28,7 +28,7 @@ export const Sidebar: React.FC = () => {
           <NavLink 
             key={to} 
             to={to} 
-            className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded font-medium transition-colors ${isActive ? 'bg-cipher-blue/10 text-cipher-blue font-bold border border-cipher-blue/30' : 'text-cipher-dim hover:text-cipher-text hover:bg-cipher-bg border border-transparent'}`}
+            className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded font-medium transition-all duration-300 ${isActive ? 'bg-cipher-blue/10 text-cipher-blue font-bold border border-cipher-blue/50 shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'text-cipher-dim hover:text-cipher-text hover:bg-white/5 border border-transparent'}`}
           >
             <Icon size={18} />
             {label}
@@ -69,7 +69,7 @@ export const Sidebar: React.FC = () => {
         )}
       </div>
 
-      <div className="p-4 border-t border-cipher-border text-center flex flex-col shrink-0 bg-cipher-bg/50">
+      <div className="p-4 border-t border-cipher-border text-center flex flex-col shrink-0 bg-transparent">
         <span className="text-xs text-cipher-dim font-mono font-bold">CIPHER v3.0</span>
         <span className="text-[10px] text-cipher-dim mt-1 cursor-pointer hover:underline hover:text-cipher-text transition-colors">Risk Disclaimer</span>
       </div>

@@ -7,12 +7,12 @@ export const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const { data: globalData } = useGlobalData()
 
   return (
-    <div className="flex h-screen bg-cipher-bg text-cipher-text overflow-hidden font-sans">
+    <div className="flex h-screen bg-cipher-bg bg-mesh text-cipher-text overflow-hidden">
       <Sidebar />
-      <div className="flex flex-col flex-1 w-full lg:ml-64 relative pb-[72px] lg:pb-0 h-full overflow-hidden">
+      <div className="flex flex-col flex-1 w-full lg:ml-64 relative pb-[72px] lg:pb-0 h-full overflow-hidden bg-transparent">
         
         {/* Top Bar */}
-        <header className="h-[60px] bg-cipher-surface border-b border-cipher-border flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shrink-0 shadow-sm">
+        <header className="h-[60px] glass-panel-heavy border-x-0 border-t-0 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
           <div className="flex items-center lg:hidden gap-2">
             <div className="w-6 h-6 bg-cipher-blue rounded flex items-center justify-center font-bold text-[10px] text-white shadow shadow-cipher-blue/50">C</div>
             <span className="font-bold tracking-widest text-white text-sm">CIPHER</span>
@@ -49,7 +49,7 @@ export const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         </header>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto relative scroll-smooth bg-cipher-bg">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto relative scroll-smooth bg-transparent">
           {children}
         </main>
       </div>
