@@ -85,7 +85,7 @@ Define a hard stop-loss price and provide the rationale.
         </button>
       </div>
 
-      <StreamingTerminal status={status} rawText={rawText} searches={searches} error={error} onAbort={abort} />
+      <StreamingTerminal status={status} rawText={rawText} searches={searches} error={error} onAbort={abort} onRetry={handleCalculate} />
 
       {status === 'error' && !result && rawText && (
         <div className="bg-cipher-surface border border-cipher-border p-4 rounded overflow-auto">

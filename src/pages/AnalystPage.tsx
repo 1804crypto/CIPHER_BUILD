@@ -80,7 +80,7 @@ Build all 4 price scenarios including the bear/zero case.
       </div>
 
       <div className="print:hidden">
-        <StreamingTerminal status={status} rawText={rawText} searches={searches} error={error} onAbort={abort} />
+        <StreamingTerminal status={status} rawText={rawText} searches={searches} error={error} onAbort={abort} onRetry={() => handleAnalyse(tokenSearch)} />
       </div>
 
       {status === 'error' && !result && rawText && (

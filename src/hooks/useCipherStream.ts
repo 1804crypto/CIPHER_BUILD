@@ -32,7 +32,17 @@ export function useCipherStream() {
         signal: abortRef.current.signal,
       })
 
-      if (!res.ok) throw new Error(`Server error: ${res.status}`)
+      if (!res.ok) {
+        if (res.status === 429) {
+          try {
+            const data = await res.json()
+            throw new Error(data.error || 'Rate limit exceeded. Wait 60 seconds.')
+          } catch {
+            throw new Error('Rate limit exceeded. Wait 60 seconds.')
+          }
+        }
+        throw new Error(`Server error: ${res.status}`)
+      }
 
       const reader = res.body!.getReader()
       const decoder = new TextDecoder()

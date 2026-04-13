@@ -1,5 +1,17 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Terminal, Search, AlertCircle, XCircle } from 'lucide-react'
+
+const CountdownTimer: React.FC<{ initialSeconds: number }> = ({ initialSeconds }) => {
+  const [seconds, setSeconds] = useState(initialSeconds)
+  
+  useEffect(() => {
+    if (seconds <= 0) return
+    const interval = setInterval(() => setSeconds(s => s - 1), 1000)
+    return () => clearInterval(interval)
+  }, [seconds])
+
+  return <span className="font-bold underline">{seconds}s</span>
+}
 
 interface Props {
   status: 'idle' | 'streaming' | 'done' | 'error'
@@ -7,9 +19,10 @@ interface Props {
   searches: string[]
   error: string | null
   onAbort?: () => void
+  onRetry?: () => void
 }
 
-export const StreamingTerminal: React.FC<Props> = ({ status, rawText, searches, error, onAbort }) => {
+export const StreamingTerminal: React.FC<Props> = ({ status, rawText, searches, error, onAbort, onRetry }) => {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -78,9 +91,33 @@ export const StreamingTerminal: React.FC<Props> = ({ status, rawText, searches, 
         </div>
 
         {error && (
-          <div className="relative z-10 mt-4 p-3 bg-cipher-red/10 border border-cipher-red/50 text-cipher-red rounded flex items-start gap-2">
-            <AlertCircle size={16} className="shrink-0 mt-0.5" />
-            <p>{error}</p>
+          <div className="relative z-10 mt-4 p-3 bg-cipher-red/10 border border-cipher-red/50 text-cipher-red rounded flex items-center justify-between gap-4">
+            <div className="flex items-start gap-2 max-w-full">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <div className="break-words">
+                {(() => {
+                  const waitMatch = error.match(/Wait (\d+) seconds/i)
+                  if (waitMatch && waitMatch[1]) {
+                    const parts = error.split(waitMatch[0])
+                    return (
+                      <p>
+                        {parts[0]}Wait <CountdownTimer initialSeconds={parseInt(waitMatch[1], 10)} /> seconds{parts[1]}
+                      </p>
+                    )
+                  }
+                  return <p>{error}</p>
+                })()}
+              </div>
+            </div>
+            {onRetry && (
+              <button 
+                onClick={onRetry}
+                className="shrink-0 px-3 py-1 bg-cipher-red/20 hover:bg-cipher-red/30 border border-cipher-red/50 rounded text-xs font-bold uppercase transition-colors"
+                type="button"
+              >
+                Retry
+              </button>
+            )}
           </div>
         )}
       </div>

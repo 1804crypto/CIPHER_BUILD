@@ -126,7 +126,7 @@ Apply Epistemic Integrity Protocol throughout.
         )}
       </div>
 
-      <StreamingTerminal status={status} rawText={rawText} searches={searches} error={error} onAbort={abort} />
+      <StreamingTerminal status={status} rawText={rawText} searches={searches} error={error} onAbort={abort} onRetry={handleAudit} />
 
       {status === 'error' && !result && rawText && (
         <div className="bg-cipher-surface border border-cipher-border p-4 rounded overflow-auto">
