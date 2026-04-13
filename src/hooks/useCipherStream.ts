@@ -25,7 +25,8 @@ export function useCipherStream() {
     setState({ status: 'streaming', rawText: '', searches: [], parsedData: null, error: null })
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/cipher/stream`, {
+      const apiBase = import.meta.env.VITE_API_BASE || ''
+      const res = await fetch(`${apiBase}/api/cipher/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ module, userPrompt }),

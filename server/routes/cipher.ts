@@ -21,6 +21,7 @@ async function callZaiStreamFallback(systemPrompt: string, conversationHistory: 
     },
     body: JSON.stringify({
       model: 'glm-4-plus',
+      max_tokens: 8192,
       messages: zaiMessages,
       stream: true,
       tools: [{ type: 'web_search', web_search: { enable: true } }]
@@ -68,6 +69,7 @@ async function callZaiOnceFallback(systemPrompt: string, fullUserPrompt: string)
     },
     body: JSON.stringify({
       model: 'glm-4-plus',
+      max_tokens: 8192,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: fullUserPrompt }
